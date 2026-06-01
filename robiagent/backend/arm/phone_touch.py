@@ -362,15 +362,16 @@ class RightSO101Controller:
 
 
     def tap_phone(self):
+        ee_act = self.get_ik()
         for i in (1, -1):
-            self.ee_act['ee.x'] += i * 0.03
+            ee_act['ee.x'] += i * 0.03
             if self.use_weighted_interpolation:
                 robot_obs = self.robot.get_observation()
                 ee_obs = self.joints_to_ee(robot_obs)
                 origin_loc = np.array([ee_obs['ee.x'], ee_obs['ee.y'], ee_obs['ee.z']])
-                target_loc = np.array([self.ee_act['ee.x'], self.ee_act['ee.y'], self.ee_act['ee.z']])
+                target_loc = np.array([ee_act['ee.x'], ee_act['ee.y'], ee_act['ee.z']])
                 ee_act_list = self.weighted_interpolation(origin_loc, target_loc, 20)
-                ee_act = self.ee_act
+                # ee_act = self.ee_act
                 for ee_act_array in ee_act_list:
                     ee_act['ee.x'] = ee_act_array[0]
                     ee_act['ee.y'] = ee_act_array[1]
@@ -391,7 +392,6 @@ class RightSO101Controller:
             time.sleep(0.5)
             self.touch_phone(phone_ik_temp,False)
             time.sleep(0.5)
-            # self.tap_phone()
 
 class Camera:
     def __init__(
@@ -478,6 +478,9 @@ class PhoneDectector:
             # 手机右下角像素坐标
             x_px = results[0].boxes.xyxy[0][2].item() - width_px_step
             y_px = results[0].boxes.xyxy[0][3].item() - height_px_step
+        elif loc == "photo button center":
+            # x_px = results[0].boxes.xyxy[0][2].item() - width_px_step
+            y_px = results[0].boxes.xyxy[0][3].item() - 2 * height_px_step
 
         cv2.circle(rgb_frame, (int(x_px), int(y_px)), radius=5, color=(0, 255, 0), thickness=-1)
         cv2.imshow("phone detection", rgb_frame)
